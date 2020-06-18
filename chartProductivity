@@ -1,0 +1,43 @@
+Sub chartProductivity()
+
+Dim chartProd As Chart
+Sheets("sheet1").Range("C10:R14").Select
+Set chartProd = Charts.Add
+
+    With chartProd
+            .ChartType = xlXYScatterSmooth
+            .Axes(xlCategory).CategoryType = xlCategoryScale
+            .Legend.Position = xlLegendPositionBottom
+    End With
+    
+        
+chartProd.HasTitle = True
+chartProd.ChartTitle.Text = Sheets("sheet1").Range("B10").Value + " - Productivity Curve"
+    For Each I In chartProd.SeriesCollection
+        I.Delete
+    Next I
+
+Set blProd = chartProd.SeriesCollection.NewSeries
+Set actualProd = chartProd.SeriesCollection.NewSeries
+
+With blProd
+    .Name = "Daily Productivity of BaseLine"
+    .XValues = Sheets("sheet1").Range("D9:" & Range("D9").Offset(0, lastColumnNumber.lastColumnNumber - 1).Address(False, False))
+    .Values = Sheets("sheet1").Range("D17:" & Range("D17").Offset(0, lastColumnNumber.lastColumnNumber - 1).Address(False, False))
+    .MarkerStyle = 8
+    .MarkerSize = 7
+    .Format.Line.ForeColor.RGB = RGB(230, 215, 108)
+End With
+
+With actualProd
+    .Name = "Daily Productivity of Actual"
+    .XValues = Sheets("sheet1").Range("D9:CU9")
+    .Values = Sheets("sheet1").Range("D18:CU18")
+    .MarkerStyle = 8
+    .MarkerSize = 7
+    .Format.Line.ForeColor.RGB = RGB(255, 0, 0)
+End With
+
+chartProd.Shapes.AddTextbox(msoTextOrientationHorizontal, 550, 5, 120, 25).TextFrame.Characters.Text = "Date: " & Sheets("sheet1").Range("B3")
+chartProd.Name = Mid(Range("A10").Value, 7, 10) & " Productivity"
+End Sub
