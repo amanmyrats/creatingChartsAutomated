@@ -1,0 +1,7 @@
+Sub beforeStart()
+
+
+Sheets("sheet1").Cells.EntireColumn.Hidden = False
+Sheets("sheet1").Cells.EntireRow.Hidden = False
+
+End Sub
