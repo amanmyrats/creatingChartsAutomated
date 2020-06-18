@@ -1,0 +1,38 @@
+Sub labelPercentage()
+
+
+
+For Each ws In ThisWorkbook.Sheets
+
+ws.Activate
+If ws.Name = ActiveChart.Name Then
+    
+    Dim nTotal, nCumulative As Range
+    Dim percentage As Double
+    Dim temporaryCell As Range
+    On Error Resume Next
+    
+    Set nTotal = Sheets("sheet1").Cells(Sheets("sheet1").Columns(1).Find(ws.Name, Lookat:=xlWhole).Row, Sheets("sheet1").Columns.Count).End(xlToLeft)
+    Set nCumulative = Sheets("sheet1").Cells(Sheets("sheet1").Columns(1).Find(ws.Name, Lookat:=xlWhole).Row, Sheets("sheet1").Columns.Count).End(xlToLeft).Offset(2, 0)
+    'percentage = nCumulative / nTotal
+    Set temporaryCell = Sheets("sheet1").Cells(Sheets("sheet1").Columns(1).Find(ws.Name, Lookat:=xlWhole).Row, Sheets("sheet1").Columns.Count).End(xlToLeft).Offset(0, 1)
+
+    temporaryCell.HasFormula = True
+    temporaryCell.Value = "=" + nCumulative.Address + "/" + nTotal.Address
+    temporaryCell.NumberFormat = "0%"
+    
+    ActiveChart.SeriesCollection(4).Points(ActiveChart.SeriesCollection(4).Points.Count).HasDataLabel = True
+    ActiveChart.SeriesCollection(4).Points(ActiveChart.SeriesCollection(4).Points.Count).DataLabel.Text = VBA.Left(temporaryCell * 100, 4) + "%"
+    ActiveChart.SeriesCollection(4).Points(ActiveChart.SeriesCollection(4).Points.Count).DataLabel.Border.Color = RGB(0, 0, 0)
+    ActiveChart.SeriesCollection(4).Points(ActiveChart.SeriesCollection(4).Points.Count).DataLabel.Interior.Color = RGB(255, 255, 255)
+    temporaryCell.ClearContents
+    Set temporaryCell = Nothing
+
+
+End If
+
+Next ws
+
+End Sub
+
+
