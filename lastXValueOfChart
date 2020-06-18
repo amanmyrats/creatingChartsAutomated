@@ -1,0 +1,15 @@
+Function lastXValueOfChart()
+
+Dim ccc As String
+
+Sheets("sheet1").Activate
+
+ccc = Cells(9, Range("C9").End(xlToRight).Column).Address(False, False)
+'Range("E1").Value = Range(ccc).Offset(0, -3).Address(False, False)
+
+
+lastXValueOfChart = Range(ccc).Offset(0, -3).Address(False, False)
+
+
+
+End Function
