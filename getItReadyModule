@@ -1,0 +1,147 @@
+Sub getitready()
+
+'Preparation of S-Curves
+
+Dim ilgilihucre As String
+Dim hucresayisi As Integer
+Dim hataCumlesi As String
+hataCumlesi = ""
+
+For hucresayisi = 10 To 5000
+    ilgilihucre = "C" & hucresayisi
+    If Range(ilgilihucre).Value = "Cum Remaining Material " Or Range(ilgilihucre).Value = "Cum Remaining Material" Then
+        Range(ilgilihucre).Value = "OLD Cum Remaining Material"
+        Rows(hucresayisi).Select
+        Selection.Copy
+        Rows(hucresayisi).Select
+        Selection.Insert shift:=xlDown
+        Range(ilgilihucre).Value = "Adj. Cum Remaining Material"
+            For kolonharfi = 200 To 5 Step -1
+                If IsNumeric(Cells(hucresayisi - 2, kolonharfi).Value) = True Then
+                    If IsNumeric(Cells(hucresayisi + 1, kolonharfi)) = True Then
+                        If IsEmpty(Cells(hucresayisi - 2, kolonharfi).Value) = True Then
+                            If IsEmpty(Cells(hucresayisi + 1, kolonharfi)) = False Then
+                                Cells(hucresayisi, kolonharfi).Value = "=" & Cells(hucresayisi + 1, kolonharfi) & "+" & 0
+                            End If
+                        End If
+                        If IsEmpty(Cells(hucresayisi - 2, kolonharfi).Value) = False Then
+                            If IsEmpty(Cells(hucresayisi + 1, kolonharfi)) = False Then
+                                Cells(hucresayisi, kolonharfi).Value = "=" & Cells(hucresayisi + 1, kolonharfi) & "+" & Cells(hucresayisi - 2, kolonharfi)
+                                Cells(hucresayisi, kolonharfi - 1).Value = "=" & Cells(hucresayisi - 2, kolonharfi - 1)
+                            End If
+                        End If
+                    Else
+                        'Ask user if they want to continue or not
+                        hataCumlesi = " ERROR: Name of your table: " & Cells(10, 2).Value2 & vbNewLine & _
+                        "Address of the cell: " & Cells(hucresayisi + 1, kolonharfi).Address & vbNewLine & _
+                        "Description of error: The value of the cell is not number, please check." & vbNewLine & _
+                        "(If you continue, I will do my best to make your charts)" & vbNewLine & _
+                        "(But I advise you to go back and fix the issue)" & vbNewLine & _
+                        "Do you want to continue or you will retry after fixing the issue? " & vbNewLine & _
+                        "Select Retry to continue, select Cancel to stop"
+                        Dim resp As String
+                        resp = MsgBox(hataCumlesi, vbRetryCancel)
+                        If resp = vbRetry Then
+                        ElseIf resp = vbCancel Then
+                            End
+                        End If
+                    End If
+                Else
+                    'Ask user if they want to continue or not
+                    hataCumlesi = " ERROR: Name of your table: " & Cells(10, 2).Value2 & vbNewLine & _
+                        "Address of the cell: " & Cells(hucresayisi - 2, kolonharfi).Address & vbNewLine & _
+                        "Description of error: The value of the cell is not number, please check." & vbNewLine & _
+                        "(If you continue, I will do my best to make your charts)" & vbNewLine & _
+                        "(But I advise you to go back and fix the issue)" & vbNewLine & _
+                        "Do you want to continue or you will retry after fixing the issue? " & vbNewLine & _
+                        "Select Retry to continue, select Cancel to stop"
+                        Dim resp5 As String
+                        resp5 = MsgBox(hataCumlesi, vbRetryCancel)
+                        If resp5 = vbRetry Then
+                        ElseIf resp5 = vbCancel Then
+                            End
+                        End If
+                End If
+            Next kolonharfi
+    End If
+Next hucresayisi
+
+'Preparation of Productivity
+Dim satirSayaci, blDailySatirSayisi, actualDailySatirSayisi, toplamKolonSayisi, kolonHarfSayisi As Integer
+For satirSayaci = 10 To 5000
+    If Cells(satirSayaci, 3).Value = "OLD Cum Remaining Material" Then
+        Rows(satirSayaci & ":" & satirSayaci).Select
+        Selection.Copy
+        Rows(satirSayaci & ":" & satirSayaci).Select
+        Selection.Insert shift:=xlDown
+        Rows(satirSayaci & ":" & satirSayaci).Select
+        Selection.Copy
+        Rows(satirSayaci & ":" & satirSayaci).Select
+        Selection.Insert shift:=xlDown
+        blDailySatirSayisi = satirSayaci + 1
+        actualDailySatirSayisi = satirSayaci + 2
+        Cells(satirSayaci, 3).Value = "Very OLD Cum Remaining Material"
+        Cells(blDailySatirSayisi, 3).Value = "Daily Productivity of BaseLine"
+        Cells(actualDailySatirSayisi, 3).Value = "Daily Productivity of Actual"
+        toplamKolonSayisi = 0
+        For sayac2 = 1 To 5000
+            If Len(Cells(9, sayac2).Value) > 0 Then
+                toplamKolonSayisi = toplamKolonSayisi + 1
+            End If
+        Next sayac2
+        For kolonHarfSayisi = 4 To toplamKolonSayisi
+            Cells(blDailySatirSayisi, kolonHarfSayisi).Value = "=" & Cells(blDailySatirSayisi - 7, kolonHarfSayisi).Address(False, False) & "/6"
+            If IsNumeric(Cells(blDailySatirSayisi, kolonHarfSayisi).Value) Then
+                If Cells(blDailySatirSayisi, kolonHarfSayisi).Value = 0 Then
+                    Cells(blDailySatirSayisi, kolonHarfSayisi).Value = ""
+                End If
+            Else
+                'Ask user if they want to continue or not
+                hataCumlesi = " ERROR: Name of your table: " & Cells(10, 2).Value2 & vbNewLine & _
+                        "Address of the cell: " & Cells(blDailySatirSayisi, kolonHarfSayisi).Address & vbNewLine & _
+                        "Description of error: The value of the cell is not number, please check." & vbNewLine & _
+                        "(If you continue, I will do my best to make your charts)" & vbNewLine & _
+                        "(But I advise you to go back and fix the issue)" & vbNewLine & _
+                        "Do you want to continue or you will retry after fixing the issue? " & vbNewLine & _
+                        "Select Retry to continue, select Cancel to stop"
+                        Dim resp3 As String
+                        resp3 = MsgBox(hataCumlesi, vbRetryCancel)
+                        If resp3 = vbRetry Then
+                            Cells(blDailySatirSayisi, kolonHarfSayisi).Value = ""
+                        ElseIf resp3 = vbCancel Then
+                            End
+                        End If
+            End If
+            Cells(actualDailySatirSayisi, kolonHarfSayisi).Value = "=" & Cells(actualDailySatirSayisi - 6, kolonHarfSayisi).Address(False, False) & "/6"
+            If IsNumeric(Cells(actualDailySatirSayisi, kolonHarfSayisi).Value) Then
+                If Cells(actualDailySatirSayisi, kolonHarfSayisi).Value = 0 Then
+                    Cells(actualDailySatirSayisi, kolonHarfSayisi).Value = ""
+                End If
+            Else
+                'Ask user if they want to continue or not
+                hataCumlesi = " ERROR: Name of your table: " & Cells(10, 2).Value2 & vbNewLine & _
+                        "Address of the cell: " & Cells(actualDailySatirSayisi, kolonHarfSayisi).Address & vbNewLine & _
+                        "Description of error: The value of the cell is not number, please check." & vbNewLine & _
+                        "(If you continue, I will do my best to make your charts)" & vbNewLine & _
+                        "(But I advise you to go back and fix the issue)" & vbNewLine & _
+                        "Do you want to continue or you will retry after fixing the issue? " & vbNewLine & _
+                        "Select Retry to continue, select Cancel to stop"
+                        Dim resp4 As String
+                        resp4 = MsgBox(hataCumlesi, vbRetryCancel)
+                        If resp4 = vbRetry Then
+                            Cells(actualDailySatirSayisi, kolonHarfSayisi).Value = ""
+                        ElseIf resp4 = vbCancel Then
+                            End
+                        End If
+            End If
+        Next kolonHarfSayisi
+    End If
+Next satirSayaci
+
+'Here number format process is done, begins
+For numaraAyarlayici = 10 To 5000
+    Rows(numaraAyarlayici & ":" & numaraAyarlayici).NumberFormat = "0"
+Next numaraAyarlayici
+'Here number format process is done, ends
+
+End Sub
