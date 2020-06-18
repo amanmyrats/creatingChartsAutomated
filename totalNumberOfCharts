@@ -1,0 +1,9 @@
+Function totalNumberOfCharts()
+
+Dim aaa As Integer
+
+aaa = Sheets("Sheet1").Range("B10:B5000").Cells.SpecialCells(xlCellTypeConstants).Count
+
+totalNumberOfCharts = aaa
+
+End Function
