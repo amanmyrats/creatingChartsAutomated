@@ -1,0 +1,18 @@
+Function chartNameRowNumber(hangichart As Integer)
+
+Dim currentcell As String
+
+Sheets("sheet1").Activate
+
+Range("B9").Select
+
+    For b = 1 To hangichart
+    
+    currentcell = Selection.End(xlDown).Address(False, False)
+    Range(currentcell).Select
+
+    Next b
+
+chartNameRowNumber = currentcell
+
+End Function
