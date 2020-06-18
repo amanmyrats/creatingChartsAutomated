@@ -1,0 +1,22 @@
+Sub axisLabels()
+
+    ActiveChart.SetElement (msoElementPrimaryCategoryAxisTitleAdjacentToAxis)
+    ActiveChart.SetElement (msoElementPrimaryValueAxisTitleAdjacentToAxis)
+    ActiveChart.SetElement (msoElementSecondaryValueAxisTitleAdjacentToAxis)
+    
+    ActiveChart.Axes(xlValue, xlPrimary).HasTitle = True
+    ActiveChart.Axes(xlValue, xlSecondary).HasTitle = True
+    ActiveChart.Axes(xlCategory, xlPrimary).HasTitle = True
+    
+    If Right(Sheets("sheet1").Range("B10").Value, 8) = "Concrete" Then
+        ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Text = "m3"
+        ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Text = "m3"
+    Else
+        ActiveChart.Axes(xlValue, xlPrimary).AxisTitle.Text = "m2"
+        ActiveChart.Axes(xlValue, xlSecondary).AxisTitle.Text = "m2"
+    End If
+
+    ActiveChart.Axes(xlCategory, xlPrimary).AxisTitle.Text = "Date"
+    ActiveChart.HasTitle = True
+    
+End Sub
