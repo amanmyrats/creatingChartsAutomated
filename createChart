@@ -1,0 +1,117 @@
+Sub createChart()
+
+beforeStart.beforeStart
+
+Dim chartquantity As Integer
+Dim titleAdresi As String
+Dim mychart As Chart
+Dim lastColumn As Integer
+Dim I As Integer
+        Sheets("Sheet1").Activate
+                    For Each oldchart In ActiveWorkbook.Charts
+                    Application.DisplayAlerts = False
+                    oldchart.Delete
+                    Application.DisplayAlerts = True
+                    Next oldchart
+                    
+                    
+chartquantity = totalNumberOfCharts.totalNumberOfCharts
+lastColumn = lastColumnNumber.lastColumnNumber
+For I = 1 To chartquantity
+    Sheets("sheet1").Range("C10:R14").Select
+    Set mychart = Charts.Add
+                    
+    For Each a In mychart.SeriesCollection
+        a.Delete
+    Next a
+    
+    Set BLProject = mychart.SeriesCollection.NewSeries
+    Set CumBLProject = mychart.SeriesCollection.NewSeries
+    Set Actual = mychart.SeriesCollection.NewSeries
+    Set CumActual = mychart.SeriesCollection.NewSeries
+    Set Remaining = mychart.SeriesCollection.NewSeries
+    Set AdjCumRemaining = mychart.SeriesCollection.NewSeries
+
+        With mychart
+
+                .ChartType = xlColumnClustered
+                .Axes(xlCategory).CategoryType = xlCategoryScale
+                .Legend.Position = xlLegendPositionBottom
+        End With
+        Sheets("Sheet1").Activate
+
+                With BLProject
+                    .Name = Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(0, 1).Value
+                    .XValues = Sheets("sheet1").Range("D9:" & lastXValueOfChart.lastXValueOfChart)
+                    .Values = Sheets("sheet1").Range(Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(0, 2).Address & ":" & Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(0, lastColumn).Address)
+                    .Format.Fill.ForeColor.ObjectThemeColor = msoThemeColorBackground1
+                    .Format.Fill.ForeColor.TintAndShade = 0
+                    .Format.Fill.ForeColor.Brightness = -0.150000006
+                    .Format.Fill.Transparency = 0
+                    .Format.Fill.Solid
+        
+                End With
+        
+                With CumBLProject
+                    .Name = Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(1, 1).Value
+                    .XValues = Sheets("sheet1").Range("D9:" & lastXValueOfChart.lastXValueOfChart)
+                    .Values = Sheets("sheet1").Range(Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(1, 2).Address & ":" & Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(1, lastColumn).Address)
+                    .ChartType = xlLine
+                    .AxisGroup = 2
+                    .Format.Line.ForeColor.RGB = RGB(230, 215, 108)
+                    .Format.Line.Weight = 3
+                End With
+        
+                With Actual
+                    .Name = Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(2, 1).Value
+                    .XValues = Sheets("sheet1").Range("D9:" & lastXValueOfChart.lastXValueOfChart)
+                    .Values = Sheets("sheet1").Range(Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(2, 2).Address & ":" & Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(2, lastColumn).Address)
+                    .Format.Fill.ForeColor.ObjectThemeColor = msoThemeColorAccent6
+                End With
+        
+                With CumActual
+                    .Name = Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(3, 1).Value
+                    .XValues = Sheets("sheet1").Range("D9:" & lastXValueOfChart.lastXValueOfChart)
+                    .Values = Sheets("sheet1").Range(Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(3, 2).Address & ":" & Range(Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(2, 1000).End(xlToLeft).End(xlToLeft).End(xlToLeft).Address(False, False)).Offset(1, 0).Address(False, False))
+                    .ChartType = xlLine
+                    .AxisGroup = 2
+                    .Format.Line.ForeColor.RGB = RGB(255, 0, 0)
+                    .Format.Line.Weight = 3
+                End With
+        
+                With Remaining
+                    .Name = Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(4, 1).Value
+                    .XValues = Sheets("sheet1").Range("D9:" & lastXValueOfChart.lastXValueOfChart)
+                    .Values = Sheets("sheet1").Range(Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(4, 2).Address & ":" & Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(4, lastColumn).Address)
+                    .Format.Fill.ForeColor.RGB = RGB(0, 112, 192)
+                End With
+        
+                With AdjCumRemaining
+                    .Name = Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(5, 1).Value
+                    .XValues = Sheets("sheet1").Range("D9:" & lastXValueOfChart.lastXValueOfChart)
+                    .Values = Sheets("sheet1").Range(Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(5, 2).Address & ":" & Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(5, lastColumn).Address)
+                    .ChartType = xlLine
+                    .AxisGroup = 2
+                    .Format.Line.ForeColor.RGB = RGB(0, 176, 240)
+                    .Format.Line.Weight = 3
+                End With
+                
+                mychart.Activate
+                axisLabels.axisLabels
+                titleAdresi = chartNameRowNumber.chartNameRowNumber(I)
+                mychart.ChartTitle.Text = Range(chartNameRowNumber.chartNameRowNumber(I)).Value
+
+                mychart.Shapes.AddTextbox(msoTextOrientationHorizontal, 565, 5, 120, 25).TextFrame.Characters.Text = "Date: " & Range("B3")
+        
+                mychart.Name = Mid(Range(chartNameRowNumber.chartNameRowNumber(I)).Offset(0, -1).Value, 1, 50)
+
+Next I
+
+chartProductivity.chartProductivity
+afterFinish.afterFinish
+
+labelPercentage.labelPercentage
+adding_picture.addpicture
+
+
+End Sub
