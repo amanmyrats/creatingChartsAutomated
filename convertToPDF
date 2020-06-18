@@ -1,0 +1,57 @@
+Sub convertToPDF()
+Dim myfso As FileSystemObject
+Dim myfolder As Folder
+Dim myfile As File
+Dim xfile As File
+Dim islenjekpapla, pdfDoredilmeliPapka As Folder
+Dim strNameOfPDF, wagt As String
+
+Dim secim As FileDialog
+
+Set myfso = New Scripting.FileSystemObject
+'Set myfolder = myfso.GetFolder(ThisWorkbook.Path & "\test_file")
+'Set myfile = myfso.GetFile(myfolder.Path & "\cykdajylar CHARTS.xlsx")
+
+Set secim = Application.FileDialog(msoFileDialogFolderPicker)
+secim.AllowMultiSelect = False
+'secim.InitialFileName = myfile.ParentFolder
+secim.ButtonName = "Sayla"
+secim.Show
+Set islenjekpapka = myfso.GetFolder(secim.SelectedItems(1))
+
+If Not myfso.FolderExists(islenjekpapka & "\PDF of Charts") Then
+    Set pdfDoredilmeliPapka = myfso.CreateFolder(islenjekpapka & "\PDF of Charts")
+ElseIf myfso.FolderExists(islenjekpapka & "\PDF of Charts") Then
+    Set pdfDoredilmeliPapka = myfso.GetFolder(islenjekpapka & "\PDF of Charts")
+End If
+
+For Each xfile In islenjekpapka.Files
+
+    If InStr(xfile.Name, "CHARTS") > 0 And InStr(myfso.GetExtensionName(xfile), "xlsm") > 0 Then
+        ActiveWorkbook.FollowHyperlink xfile
+        strNameOfPDF = Right(Workbooks(xfile.Name).Sheets(Sheets.Count).Range("B3").Value, 4) & _
+            Mid(Workbooks(xfile.Name).Sheets(Sheets.Count).Range("B3").Value, 4, 2) & _
+            Left(Workbooks(xfile.Name).Sheets(Sheets.Count).Range("B3").Value, 2) & _
+            "_" & Left(xfile.Name, Len(xfile.Name) - 5)
+        
+        For j = 1 To Sheets.Count
+            If InStr(Workbooks(xfile.Name).Sheets(j).Name, "TBA") > 0 Or InStr(Workbooks(xfile.Name).Sheets(j).Name, "SBA") > 0 Or _
+                InStr(Workbooks(xfile.Name).Sheets(j).Name, "CRI") > 0 Or InStr(Workbooks(xfile.Name).Sheets(j).Name, "CRA") > 0 Or _
+                InStr(Workbooks(xfile.Name).Sheets(j).Name, "Productivity") > 0 Then
+                Else
+                Workbooks(xfile.Name).Sheets(j).Visible = 0
+            End If
+        Next j
+        On Error Resume Next
+        Workbooks(xfile.Name).ExportAsFixedFormat Type:=xlTypePDF, Filename:=pdfDoredilmeliPapka & "\" & strNameOfPDF & ".pdf"
+        Application.DisplayAlerts = False
+        Workbooks(xfile.Name).Close
+        Application.DisplayAlerts = True
+    End If
+
+Next xfile
+
+
+End Sub
+
+
