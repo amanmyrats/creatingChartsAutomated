@@ -1,0 +1,103 @@
+Sub addpicture()
+'
+' Macro3 Macro
+'
+
+
+Dim tba, sba, logo As Shapes
+Dim I As Integer
+Dim bylogo, sbalogo, tbalogo As Shape
+
+Set bylogo = Sheets("photos").Shapes("by_logo")
+Set sbalogo = Sheets("photos").Shapes("sba_logo")
+Set tbalogo = Sheets("photos").Shapes("tba_logo")
+Set cralogo = Sheets("photos").Shapes("cra_logo")
+Set crilogo = Sheets("photos").Shapes("cri_logo")
+
+On Error Resume Next
+    For Each ws In ThisWorkbook.Sheets
+
+        If TypeName(ws) = "Chart" Then
+            
+'            On Error Resume Next
+            ws.PlotArea.Height = 350
+            ws.PlotArea.Top = ws.ChartArea.Height * 0.15
+            
+            For Each sh In ws.Shapes
+                If Not ws.Name = "sheet1" Then
+                    If Not ws.Name = "photos" Then
+                        If sh.Type = msoPicture Then
+                            sh.Delete
+                        End If
+                    End If
+                End If
+            Next sh
+            
+            bylogo.Copy
+            ws.Paste
+            Dim picleft As Shape
+            Set picleft = ws.Shapes(ws.Shapes.Count)
+                        
+            picleft.IncrementLeft Increment:=ws.ChartArea.Width * 0.08
+            picleft.IncrementTop Increment:=ws.ChartArea.Width * 0.03
+            Set picleft = Nothing
+            
+            If InStr(1, ws.Name, "TBA") > 0 Then
+                tbalogo.Copy
+                ws.Paste
+                Dim picright1 As Shape
+                Set picright1 = ws.Shapes(ws.Shapes.Count)
+                            
+                picright1.IncrementLeft Increment:=ws.ChartArea.Width * 0.78
+                picright1.IncrementTop Increment:=ws.ChartArea.Width * 0.03
+                Set picright1 = Nothing
+            End If
+            If InStr(1, ws.Name, "SBA") > 0 Then
+                sbalogo.Copy
+                ws.Paste
+                
+                Dim picright2 As Shape
+                Set picright2 = ws.Shapes(ws.Shapes.Count)
+                            
+                picright2.IncrementLeft Increment:=ws.ChartArea.Width * 0.78
+                picright2.IncrementTop Increment:=ws.ChartArea.Width * 0.03
+                Set picright2 = Nothing
+            End If
+            If InStr(1, ws.Name, "CRA") > 0 Then
+                cralogo.Copy
+                ws.Paste
+                
+                Dim picright3 As Shape
+                Set picright3 = ws.Shapes(ws.Shapes.Count)
+                            
+                picright3.IncrementLeft Increment:=ws.ChartArea.Width * 0.78
+                picright3.IncrementTop Increment:=ws.ChartArea.Width * 0.03
+                Set picright3 = Nothing
+            End If
+            If InStr(1, ws.Name, "CRI") > 0 Then
+                crilogo.Copy
+                ws.Paste
+                
+                Dim picright4 As Shape
+                Set picright4 = ws.Shapes(ws.Shapes.Count)
+                            
+                picright4.IncrementLeft Increment:=ws.ChartArea.Width * 0.78
+                picright4.IncrementTop Increment:=ws.ChartArea.Width * 0.03
+                Set picright4 = Nothing
+            End If
+
+        End If
+
+    Next ws
+
+Sheets("sheet1").Activate
+'    Dim pic As Shape
+'    Dim suratlar As Variant
+'For Each pic In Sheets("photos").Shapes
+'
+'    MsgBox pic.Name
+'
+'Next pic
+
+End Sub
+
