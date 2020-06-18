@@ -1,0 +1,186 @@
+Sub workingWithFiles()
+
+Dim menkiFSO As FileSystemObject
+Dim menkiFolder As Folder
+Dim menkiFile, menkiFile2, icindekiFile, benimChartUretenExcelim As File
+Dim menkiCHARTaddress, sourceAddress, destinationAddress As String
+Dim sabitKaydirilacakSatir As Double
+
+Set menkiFSO = New Scripting.FileSystemObject
+
+'Set benimChartUretenExcelim = menkiFSO.GetFile(chartUretenExcelFunction())
+'Range("A1") = menkiFSO.GetFile(chartUretenExcelFunction())
+menkiCHARTaddress = dosyalarinOlduguAdresFunction()
+'Range("A2") = dosyalarinOlduguAdresFunction()
+
+Set menkiFolder = menkiFSO.GetFolder(menkiCHARTaddress)
+'Set menkiFile = menkiFSO.GetFile(menkiFolder & "\screed.htm")
+'menkiFSO.CopyFile Source:=sourceAddress & "\screed.htm", Destination:=destinationAddress & "\screed.xls"
+Application.ScreenUpdating = False
+For Each icindekiFile In menkiFolder.Files
+    If menkiFSO.GetExtensionName(icindekiFile) = "htm" Or menkiFSO.GetExtensionName(icindekiFile) = "html" Then
+        icindekiFile.Name = VBA.Left(icindekiFile.Name, VBA.Len(icindekiFile.Name) - 3) & "xls"
+    End If
+Next icindekiFile
+For Each icindekiFile In menkiFolder.Files
+    If Not IsWorkBookOpen(icindekiFile.Name) Then
+        If menkiFSO.GetExtensionName(icindekiFile) = "xls" Then
+            ActiveWorkbook.FollowHyperlink Address:=icindekiFile, NewWindow:=True
+'            Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A2").Value = "salamssfsf"
+            If Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A2").Value <> "READY" Then
+                Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Cells.UnMerge
+                sabitKaydirilacakSatir = kaydirilacakSatir(icindekiFile.Name)
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A" & sabitKaydirilacakSatir & ":A10000")) = 0 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A" & sabitKaydirilacakSatir & ":A10000").Delete
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("h4")) = 0 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("H:J").Delete
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("D:F")) < 3 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("D:F").Delete
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("B" & sabitKaydirilacakSatir & ":B10000")) = 0 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("B:B").Delete
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Rows("4:8")) > 0 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Rows("4:8").Insert
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Rows("10:11")) < 2 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Rows("10:11").Delete
+                End If
+                For I = 1 To 5
+                    If InStr(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Value, "TBA") > 0 Or _
+                        InStr(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Value, "SBA") > 0 Or _
+                        InStr(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Value, "CRA") > 0 Or _
+                        InStr(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Value, "CRI") > 0 Then
+                        I = 6
+                    Else
+                        Rows(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Row & ":" & _
+                            Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").End(xlDown).Offset(-1, 0).Row).Delete
+                    End If
+                Next I
+                Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A2").Value = "READY"
+                Application.DisplayAlerts = False
+                Workbooks(menkiFSO.GetFileName(icindekiFile)).Save
+                Application.DisplayAlerts = True
+            End If
+            Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Rows("9:10000").Copy ThisWorkbook.Sheets("sheet1").Rows("9:9")
+            Application.DisplayAlerts = False
+            Workbooks(menkiFSO.GetFileName(icindekiFile)).Close
+            Application.DisplayAlerts = True
+            getItReadyModule.getitready
+            createChart.createChart
+            Application.DisplayAlerts = False
+            ThisWorkbook.Save
+            Application.DisplayAlerts = True
+            menkiFSO.CopyFile Source:=Application.ThisWorkbook.FullName, Destination:=menkiFolder.Path & "\" & VBA.Left(icindekiFile.Name, VBA.Len(icindekiFile.Name) - 4) & " CHARTS.xlsm"
+        End If
+    End If
+Next icindekiFile
+Application.ScreenUpdating = True
+'Workbooks("sbascreed.xls").Sheets(1).Range("A13:A" & Range("A13").End(xlDown).Row).Delete
+'Dim ac As Variant
+'ac = Shell("explorer.exe " & menkiFile2, vbNormalFocus)
+End Sub
+Function IsWorkBookOpen(Name As String) As Boolean
+    Dim xWb As Workbook
+    On Error Resume Next
+    Set xWb = Application.Workbooks.Item(Name)
+    IsWorkBookOpen = (Not xWb Is Nothing)
+End Function
+Function kaydirilacakSatir(workbookum As String) As Double
+    kaydirilacakSatir = Application.Workbooks.Item(workbookum).Sheets(1).Range("B1").End(xlDown).Row
+End Function
+Function chartUretenExcelFunction() As String
+    Dim secimPenceresi As FileDialog
+    Set secimPenceresi = Application.FileDialog(msoFileDialogFilePicker)
+    secimPenceresi.Filters.Add "Excel Files", "*.xls; *.xlsx; *.xlsm", 1
+    secimPenceresi.AllowMultiSelect = False
+    secimPenceresi.Show
+    chartUretenExcelFunction = secimPenceresi.SelectedItems.Item(1)
+End Function
+Function dosyalarinOlduguAdresFunction() As String
+    Dim adresSecimPenceresi As FileDialog
+    Set adresSecimPenceresi = Application.FileDialog(msoFileDialogFolderPicker)
+    adresSecimPenceresi.AllowMultiSelect = False
+    adresSecimPenceresi.Show
+    dosyalarinOlduguAdresFunction = adresSecimPenceresi.SelectedItems.Item(1)
+End Function
+Sub convertToXLS()
+Application.ScreenUpdating = False
+Dim menkiFSO As FileSystemObject
+Dim menkiFolder As Folder
+Dim menkiFile, menkiFile2, icindekiFile, benimChartUretenExcelim As File
+Dim menkiCHARTaddress, sourceAddress, destinationAddress As String
+Dim sabitKaydirilacakSatir As Double
+
+Set menkiFSO = New Scripting.FileSystemObject
+
+'Set benimChartUretenExcelim = menkiFSO.GetFile(chartUretenExcelFunction())
+'Range("A1") = menkiFSO.GetFile(chartUretenExcelFunction())
+menkiCHARTaddress = dosyalarinOlduguAdresFunction()
+'Range("A2") = dosyalarinOlduguAdresFunction()
+
+Set menkiFolder = menkiFSO.GetFolder(menkiCHARTaddress)
+'Set menkiFile = menkiFSO.GetFile(menkiFolder & "\screed.htm")
+'menkiFSO.CopyFile Source:=sourceAddress & "\screed.htm", Destination:=destinationAddress & "\screed.xls"
+
+For Each icindekiFile In menkiFolder.Files
+    If menkiFSO.GetExtensionName(icindekiFile) = "htm" Or menkiFSO.GetExtensionName(icindekiFile) = "html" Then
+        icindekiFile.Name = VBA.Left(icindekiFile.Name, VBA.Len(icindekiFile.Name) - 3) & "xls"
+    End If
+Next icindekiFile
+
+For Each icindekiFile In menkiFolder.Files
+    If Not IsWorkBookOpen(icindekiFile.Name) Then
+        If menkiFSO.GetExtensionName(icindekiFile) = "xls" Then
+            ActiveWorkbook.FollowHyperlink Address:=icindekiFile, NewWindow:=True
+'            Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A2").Value = "salamssfsf"
+            If Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A2").Value <> "READY" Then
+                Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Cells.UnMerge
+                sabitKaydirilacakSatir = kaydirilacakSatir(icindekiFile.Name)
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A" & sabitKaydirilacakSatir & ":A10000")) = 0 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A" & sabitKaydirilacakSatir & ":A10000").Delete
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("h4")) = 0 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("H:J").Delete
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("D:F")) < 3 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("D:F").Delete
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("B" & sabitKaydirilacakSatir & ":B10000")) = 0 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("B:B").Delete
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Rows("4:8")) > 0 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Rows("4:8").Insert
+                End If
+                If Application.WorksheetFunction.CountA(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Rows("10:11")) < 2 Then
+                    Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Rows("10:11").Delete
+                End If
+                For I = 1 To 5
+                    If InStr(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Value, "TBA") > 0 Or _
+                        InStr(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Value, "SBA") > 0 Or _
+                        InStr(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Value, "CRA") > 0 Or _
+                        InStr(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Value, "CRI") > 0 Then
+                        I = 6
+                    Else
+                        Rows(Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").Row & ":" & _
+                            Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A10").End(xlDown).Offset(-1, 0).Row).Delete
+                    End If
+                Next I
+                Workbooks(menkiFSO.GetFileName(icindekiFile)).Sheets(1).Range("A2").Value = "READY"
+                Application.DisplayAlerts = False
+                Workbooks(menkiFSO.GetFileName(icindekiFile)).Save
+                Workbooks(menkiFSO.GetFileName(icindekiFile)).Close
+                Application.DisplayAlerts = True
+            End If
+            Application.DisplayAlerts = False
+            If IsWorkBookOpen(menkiFSO.GetFileName(icindekiFile)) = True Then
+                Workbooks(menkiFSO.GetFileName(icindekiFile)).Close
+            End If
+            Application.DisplayAlerts = True
+        End If
+    End If
+Next icindekiFile
+Application.ScreenUpdating = True
+End Sub
