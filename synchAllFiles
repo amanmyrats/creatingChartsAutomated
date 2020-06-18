@@ -1,0 +1,276 @@
+Sub synchAllFiles()
+
+Dim myfso As FileSystemObject
+Dim currentFolder, baselineFolder As Folder
+Dim currentExcel, baselineExcel As Variant
+Dim currentWB, baselineWB As Workbook
+Dim currentSheet, baselineSheet As Worksheet
+Dim collCurrent, collBaseline As Collection
+Dim baselinedosyalari, currentdosyalari As Collection
+Dim mywindow As FileDialog
+Dim toplamBLdosyaSayisi, toplamCurrentDosyaSayisi As Integer
+
+Set myfso = New Scripting.FileSystemObject
+
+Application.ScreenUpdating = False
+MsgBox "Please first Select BASELINE folder than CURRENT folder that contain your baseline excel files!"
+    toplamBLdosyaSayisi = 0
+    toplamCurrentDosyaSayisi = 0
+    Set mywindow = Application.FileDialog(msoFileDialogFolderPicker)
+    mywindow.Show
+    Set baselineFolder = myfso.GetFolder(mywindow.SelectedItems.Item(1))
+'    If baselineFolder = 0 Then
+'        GoTo programiBitir
+'    End If
+    Set baselinedosyalari = New Collection
+    
+    For Each myfile In baselineFolder.Files
+        If myfso.GetExtensionName(myfile) = "xls" Then
+            baselinedosyalari.Add myfile
+            toplamBLdosyaSayisi = toplamBLdosyaSayisi + 1
+        End If
+    Next myfile
+    
+    If toplamBLdosyaSayisi = 0 Then
+        MsgBox "There is no Baseline excel file. Remember that baseline excel must be in [*.xls] format. Following format is not accepted [*.xlsx]."
+        GoTo xlsDosyaBulunamadi
+    End If
+                          
+    mywindow.Show
+    Set currentFolder = myfso.GetFolder(mywindow.SelectedItems.Item(1))
+'    If currentFolder = 0 Then
+'        GoTo programiBitir
+'    End If
+    Set currentdosyalari = New Collection
+    
+    For Each myfile In currentFolder.Files
+        If myfso.GetExtensionName(myfile) = "xls" Then
+            currentdosyalari.Add myfile
+            toplamCurrentDosyaSayisi = toplamCurrentDosyaSayisi + 1
+        End If
+    Next myfile
+    
+    If toplamCurrentDosyaSayisi = 0 Then
+        MsgBox "There is no Current excel file. Remember that current excel must be in [*.xls] format. Following format is not accepted [*.xlsx]."
+        GoTo xlsDosyaBulunamadi
+    End If
+    
+    Application.DisplayAlerts = False
+    
+    For Each currentExcel In currentdosyalari
+            Dim percentage, percentageTemp As Double
+            Dim matchedBaselineExcel As File
+            percentage = 0
+            
+        For Each baselineExcel In baselinedosyalari
+                percentageTemp = fuzzyMatchFunction.FuzzyPercent(myfso.GetFileName(currentExcel), myfso.GetFileName(baselineExcel))
+                If percentage < percentageTemp Then
+                    percentage = percentageTemp
+                    Set matchedBaselineExcel = baselineExcel
+                End If
+        Next baselineExcel
+
+
+            ActiveWorkbook.FollowHyperlink Address:=currentExcel, NewWindow:=True
+            Set currentWB = Workbooks(myfso.GetFileName(currentExcel))
+            Set currentSheet = Workbooks(myfso.GetFileName(currentExcel)).Sheets(1)
+
+            ActiveWorkbook.FollowHyperlink Address:=matchedBaselineExcel, NewWindow:=True
+            Set baselineWB = Workbooks(myfso.GetFileName(matchedBaselineExcel))
+            Set baselineSheet = Workbooks(myfso.GetFileName(matchedBaselineExcel)).Sheets(1)
+
+            Application.DisplayAlerts = True
+            Dim kopyalanmaliSetir As Integer
+            kopyalanmaliSetir = 10000
+            testForm.testLabel.Caption = ""
+duzeltildiktenSonra:
+            Dim baselineSonKolonSayisi, currentSonKolonSayisi, baselineIlkSatir, baselineSonSatir, currentSonSatir As Integer
+            baselineSonKolonSayisi = Workbooks(myfso.GetFileName(matchedBaselineExcel)).Sheets(1).Cells(9, Columns.Count).End(xlToLeft).Column
+            currentSonKolonSayisi = Workbooks(myfso.GetFileName(currentExcel)).Sheets(1).Cells(9, Columns.Count).End(xlToLeft).Column
+            baselineIlkSatir = Workbooks(myfso.GetFileName(matchedBaselineExcel)).Sheets(1).Columns(1).Find("Cost Account ID", Lookat:=xlPart).Row
+            baselinsonsatir = Workbooks(myfso.GetFileName(matchedBaselineExcel)).Sheets(1).Cells(Rows.Count, 2).End(xlUp).Row
+            currentSonSatir = Workbooks(myfso.GetFileName(currentExcel)).Sheets(1).Cells(Rows.Count, 2).End(xlUp).Row
+            
+            If Not baselineIlkSatir = 9 Then
+                MsgBox "Your baseline does not start from Row:9, please correct this please."
+                GoTo baselineRow9danBaslamiyor
+            End If
+                If baselineSonKolonSayisi = currentSonKolonSayisi Then
+                    For I = 1 To baselineSheet.Range("A9:A10000").Cells.SpecialCells(xlCellTypeConstants).Count
+    
+                        kopyalanmaliSetir = baselineSheet.Cells(kopyalanmaliSetir, 1).End(xlUp).Row
+                        If kopyalanmaliSetir > 9 Then
+    
+                            Dim chartIsmi As String
+                            chartIsmi = baselineSheet.Cells(kopyalanmaliSetir, 1).Value
+    
+                            baselineSheet.Rows(kopyalanmaliSetir & ":" & kopyalanmaliSetir + 1).Copy
+                            Dim currentYapistirilacakSatirNumarasi As Integer
+                            Dim rng As Range
+                            Set rng = currentSheet.Columns(1).Find(baselineSheet.Cells(kopyalanmaliSetir, 1).Value2, Lookat:=xlWhole)
+                            If Not rng Is Nothing Then
+                                currentYapistirilacakSatirNumarasi = rng.Row
+                                currentSheet.Rows(currentYapistirilacakSatirNumarasi & ":" & currentYapistirilacakSatirNumarasi + 1).PasteSpecial Paste:=xlPasteFormulas
+                                'currentSheet.Rows(kopyalanmaliSetir & ":" & kopyalanmaliSetir + 1).PasteSpecial Paste:=xlPasteFormulas
+                            Else
+                                Dim bulunamayanBloklar As String
+                                bulunamayanBloklar = bulunamayanBloklar & vbNewLine & vbNewLine & "File: [" & currentWB.Name & _
+                                "] were not synchronized, " & vbNewLine & "       because block [" & baselineSheet.Cells(kopyalanmaliSetir, 1).Value2 & "] does not exist."
+                            End If
+                        End If
+                    Next I
+                    Application.DisplayAlerts = False
+                    currentWB.Save
+                    currentWB.Close
+                    Application.DisplayAlerts = False
+                    baselineWB.Close savechanges:=False
+                    Application.DisplayAlerts = True
+                    Dim uyari3 As String
+                    uyari3 = "Job has been completed successfully!"
+    
+                ElseIf baselineSonKolonSayisi < currentSonKolonSayisi Then
+                    Dim uyari As String
+                    uyari = "Job has been completed successfully!" & vbNewLine & " Here are some issues you need to fix: Please check your baseline's last column, it is not same with your current excel file!"
+                    Dim aradakiKolonFarki As Integer
+                    aradakiKolonFarki = currentSonKolonSayisi - baselineSonKolonSayisi
+                    baselineSheet.Columns(baselineSonKolonSayisi - 3).Copy
+                    baselineSheet.Columns(baselineSonKolonSayisi - 2).Insert
+                    GoTo duzeltildiktenSonra
+                ElseIf baselineSonKolonSayisi > currentSonKolonSayisi Then
+                    Dim uyari2 As String
+                    uyari2 = "Job has been completed successfully!" & vbNewLine & " Here are some issues you need to fix: Please check your baseline's last column, it is not same with your current excel file!"
+                    Dim aradakiKolonFarki2 As Integer
+                    aradakiKolonFarki2 = baselineSonKolonSayisi - currentSonKolonSayisi
+                    currentSheet.Columns(currentSonKolonSayisi - 3).Copy
+                    currentSheet.Columns(currentSonKolonSayisi - 2).Insert
+                    GoTo duzeltildiktenSonra
+                End If
+            On Error Resume Next
+                Application.DisplayAlerts = False
+                currentWB.Close savechanges:=False
+                baselineWB.Close savechanges:=False
+                Application.DisplayAlerts = True
+            On Error GoTo 0
+    Next currentExcel
+    Application.ScreenUpdating = True
+    'testForm.Show
+    'testForm.testLabel.Caption = uyari & " " & uyari2 & " " & uyari3 & " " & bulunamayanBloklar
+    
+    'Show messagebox, tell user that if it is successfull or not
+    If bulunamayanBloklar = "" Then
+        MsgBox "All files successfully synchronized. Enjoy!"
+    Else
+        MsgBox bulunamayanBloklar
+    End If
+xlsDosyaBulunamadi:
+baselineRow9danBaslamiyor:
+programiBitir:
+End Sub
+Sub test()
+
+Dim myfso As FileSystemObject
+Dim myfile As File
+Dim myfolder, myfolder2 As Folder
+Dim mywindow As FileDialog
+Dim baselinedosyalari, currentdosyalari As Collection
+
+Set myfso = New Scripting.FileSystemObject
+Set mywindow = Application.FileDialog(msoFileDialogFolderPicker)
+mywindow.Show
+
+
+    Set myfolder = myfso.GetFolder(mywindow.SelectedItems.Item(1))
+    Set baselinedosyalari = New Collection
+    For Each myfile In myfolder.Files
+        If myfso.GetExtensionName(myfile) = "xls" Then
+            baselinedosyalari.Add myfso.GetFileName(myfile)
+        End If
+    Next myfile
+    
+    mywindow.Show
+    Set myfolder2 = myfso.GetFolder(mywindow.SelectedItems.Item(1))
+    Set currentdosyalari = New Collection
+    For Each myfile In myfolder2.Files
+        If myfso.GetExtensionName(myfile) = "xls" Then
+            currentdosyalari.Add myfso.GetFileName(myfile)
+        End If
+    Next myfile
+
+Dim isimler As Variant
+For Each isimler In currentdosyalari
+    MsgBox isimler
+Next isimler
+
+End Sub
+Sub TestSort()
+
+    Dim coll As New Collection
+    coll.Add "USA"
+    coll.Add "Spain"
+    coll.Add "Belguim"
+    coll.Add "Ireland"
+    
+    QuickSort coll, 1, coll.Count
+    
+    Dim v As Variant
+    For Each v In coll
+        Debug.Print v
+    Next
+    
+End Sub
+Sub QuickSort(coll As Collection, first As Long, last As Long)
+  
+  Dim vCentreVal As Variant, vTemp As Variant
+  
+  Dim lTempLow As Long
+  Dim lTempHi As Long
+  lTempLow = first
+  lTempHi = last
+  
+  vCentreVal = coll((first + last) \ 2)
+  Do While lTempLow <= lTempHi
+  
+    Do While coll(lTempLow) < vCentreVal And lTempLow < last
+      lTempLow = lTempLow + 1
+    Loop
+    
+    Do While vCentreVal < coll(lTempHi) And lTempHi > first
+      lTempHi = lTempHi - 1
+    Loop
+    
+    If lTempLow <= lTempHi Then
+    
+      ' Swap values
+      vTemp = coll(lTempLow)
+      
+      coll.Add coll(lTempHi), After:=lTempLow
+      coll.Remove lTempLow
+      
+      coll.Add vTemp, Before:=lTempHi
+      coll.Remove lTempHi + 1
+      
+      ' Move to next positions
+      lTempLow = lTempLow + 1
+      lTempHi = lTempHi - 1
+      
+    End If
+    
+  Loop
+  
+  If first < lTempHi Then QuickSort coll, first, lTempHi
+  If lTempLow < last Then QuickSort coll, lTempLow, last
+  
+End Sub
+Function IsWorkBookOpen(strBookName As String) As Boolean
+    
+    Dim oBk As Workbook
+    
+    On Error Resume Next
+    Set oBk = Workbooks(strBookName)
+    On Error GoTo 0
+    
+    If Not oBk Is Nothing Then
+        IsWorkBookOpen = True
+    End If
+    
+End Function
