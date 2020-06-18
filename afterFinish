@@ -1,0 +1,17 @@
+Sub afterFinish()
+Sheets("sheet1").Activate
+
+Dim rangeToUnhide As Range
+
+Set rangeToUnhide = Range(Columns(Range("CCC14").End(xlToLeft).End(xlToLeft).Column), Columns(Range("CCC14").End(xlToLeft).End(xlToLeft).Column + 2))
+
+Cells.EntireColumn.Hidden = False
+Cells.EntireRow.Hidden = False
+
+Range(Columns(4), Columns(Range("C12").End(xlToRight).Column - 6)).Hidden = True
+
+Range(Columns(Range("CCC14").End(xlToLeft).End(xlToLeft).End(xlToLeft).Column + 6), Columns(lastColumnNumber.lastColumnNumber + 3)).Hidden = True
+
+rangeToUnhide.Hidden = False
+
+End Sub
