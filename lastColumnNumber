@@ -1,0 +1,14 @@
+Function lastColumnNumber()
+Dim ccc As String
+
+Sheets("sheet1").Activate
+
+ccc = Cells(9, Range("C9").End(xlToRight).Column).Address(False, False)
+'Range("B1").Value = ccc
+
+
+lastColumnNumber = Range(ccc).Column - 6
+
+
+
+End Function
